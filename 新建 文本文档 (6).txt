@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科研计算助手 · 溶液与细胞</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e6f9f;
+            --primary-light: #e8f2fa;
+            --bg: #f4f8fb;
+            --card-bg: #ffffff;
+            --text-main: #1e3a4d;
+            --text-sub: #5b7a8c;
+            --border: #d0e2ef;
+            --accent: #2e9f5c;
+            --accent-hover: #248a4e;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 850px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .header-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px -5px rgba(0, 60, 90, 0.08);
+            overflow: hidden;
+            border: 1px solid #e1ecf4;
+        }
+        .card-header {
+            background: var(--primary-light);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header i {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .form-row > label {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            min-width: 130px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #f9fcfe;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2px 6px;
+            flex: 1;
+            min-width: 180px;
+            transition: border-color 0.2s;
+        }
+        .input-group:focus-within {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(30, 111, 159, 0.1);
+        }
+        .input-group input {
+            border: none;
+            background: transparent;
+            padding: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        .input-group select {
+            border: none;
+            background: #e8f2f9;
+            border-radius: 6px;
+            padding: 8px 4px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            max-width: 115px;
+        }
+        .btn-calc {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 0.5rem;
+            transition: background 0.2s;
+        }
+        .btn-calc:hover {
+            background: var(--accent-hover);
+        }
+        .result-box {
+            background: #f0f7fc;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-top: 1.2rem;
+            border-left: 4px solid var(--primary);
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: #fff;
+            padding: 2px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .divider {
+            height: 1px;
+            background: #e1ecf4;
+            margin: 1rem 0;
+        }
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .form-row > label {
+                min-width: auto;
+            }
+            .result-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="header-title"><i class="fas fa-calculator"></i>科研计算助手</h1>
+
+    <!-- 板块一：配制溶液 -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-prescription-bottle-alt"></i>
+            <h2>1. 配制溶液 (固体粉末)</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <label>要配制体积</label>
+                <div class="input-group">
+                    <input type="number" id="prepVol" value="10" step="any" placeholder="输入体积">
+                    <select id="prepVolUnit">
+                        <option value="mL" selected>mL</option>
+                        <option value="L">L</option>
+                        <option value="µL">µL</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>目标浓度</label>
+                <div class="input-group">
+                    <input type="number" id="prepConc" value="5" step="any" placeholder="输入浓度">
+                    <select id="prepConcUnit">
+                        <optgroup label="质量/体积浓度">
+                            <option value="g/L">g/L</option>
+                            <option value="mg/L">mg/L</option>
+                            <option value="µg/mL" selected>µg/mL</option>
+                            <option value="g/mL">g/mL</option>
+                            <option value="mg/mL">mg/mL</option>
+                            <option value="ng/mL">ng/mL</option>
+                            <option value="µg/µL">µg/µL</option>
+                            <option value="ng/µL">ng/µL</option>
+                        </optgroup>
+                        <optgroup label="摩尔浓度 (需填分子量)">
+                            <option value="M">M (mol/L)</option>
+                            <option value="mM">mM (mmol/L)</option>
+                            <option value="uM">uM (µmol/L)</option>
+                            <option value="nM">nM (nmol/L)</option>
+                            <option value="pM">pM (pmol/L)</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <!-- 动态分子量输入 -->
+            <div class="form-row" id="prepMwRow" style="display: none;">
+                <label>分子量 (g/mol)</label>
+                <div class="input-group">
+                    <input type="number" id="prepMw" value="180" step="any" placeholder="输入分子量">
+                </div>
+            </div>
+            
+            <button class="btn-calc" onclick="calculatePrep()"><i class="fas fa-calculator"></i> 计算</button>
+
+            <div class="result-box">
+                <div class="result-item">
+                    <span>需要称取固体</span>
+                    <span class="result-value" id="prepResult">0 g</span>
+                </div>
+            </div>
+            <div class="hint"><i class="fas fa-info-circle"></i> 选择摩尔浓度时，请务必填写分子量。</div>
+        </div>
+    </div>
+
+    <!-- 板块二：稀释溶液 -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-tint"></i>
+            <h2>2. 稀释溶液</h2>
+        </div>
+        <div class="card-body">
+            <div class="section-title"><i class="fas fa-flask"></i> 母液信息</div>
+            <div class="form-row">
+                <label>现有体积</label>
+                <div class="input-group">
+                    <input type="number" id="dilVol" value="1" step="any" placeholder="输入体积">
+                    <select id="dilVolUnit">
+                        <option value="mL" selected>mL</option>
+                        <option value="L">L</option>
+                        <option value="µL">µL</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>母液浓度</label>
+                <div class="input-group">
+                    <input type="number" id="dilConc" value="10" step="any" placeholder="输入浓度">
+                    <select id="dilConcUnit">
+                        <optgroup label="质量/体积浓度">
+                            <option value="g/L">g/L</option>
+                            <option value="mg/L">mg/L</option>
+                            <option value="µg/L">µg/L</option>
+                            <option value="g/mL">g/mL</option>
+                            <option value="mg/mL" selected>mg/mL</option>
+                            <option value="µg/mL">µg/mL</option>
+                            <option value="ng/mL">ng/mL</option>
+                            <option value="µg/µL">µg/µL</option>
+                            <option value="ng/µL">ng/µL</option>
+                        </optgroup>
+                        <optgroup label="摩尔浓度">
+                            <option value="M">M</option>
+                            <option value="mM">mM</option>
+                            <option value="uM">uM</option>
+                            <option value="nM">nM</option>
+                            <option value="pM">pM</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-title"><i class="fas fa-filter"></i> 目标工作液信息</div>
+            <div class="form-row">
+                <label>目标稀释浓度</label>
+                <div class="input-group">
+                    <input type="number" id="targetConc" value="1" step="any" placeholder="输入目标浓度">
+                    <select id="targetConcUnit">
+                        <!-- 选项与母液浓度保持一致，方便计算 -->
+                        <optgroup label="质量/体积浓度">
+                            <option value="g/L">g/L</option>
+                            <option value="mg/L">mg/L</option>
+                            <option value="µg/L">µg/L</option>
+                            <option value="g/mL">g/mL</option>
+                            <option value="mg/mL">mg/mL</option>
+                            <option value="µg/mL" selected>µg/mL</option>
+                            <option value="ng/mL">ng/mL</option>
+                            <option value="µg/µL">µg/µL</option>
+                            <option value="ng/µL">ng/µL</option>
+                        </optgroup>
+                        <optgroup label="摩尔浓度">
+                            <option value="M">M</option>
+                            <option value="mM">mM</option>
+                            <option value="uM">uM</option>
+                            <option value="nM">nM</option>
+                            <option value="pM">pM</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>需要溶液体积</label>
+                <div class="input-group">
+                    <input type="number" id="targetVol" value="10" step="any" placeholder="输入所需体积">
+                    <select id="targetVolUnit">
+                        <option value="mL" selected>mL</option>
+                        <option value="L">L</option>
+                        <option value="µL">µL</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn-calc" onclick="calculateDilution()"><i class="fas fa-calculator"></i> 计算</button>
+
+            <div class="result-box">
+                <div class="result-item">
+                    <span>需要取母液体积</span>
+                    <span class="result-value" id="dilStockRes">0 mL</span>
+                </div>
+                <div class="result-item">
+                    <span>需要加入溶剂体积</span>
+                    <span class="result-value" id="dilSolventRes">0 mL</span>
+                </div>
+            </div>
+            <div class="hint"><i class="fas fa-info-circle"></i> 系统会自动将母液和目标浓度统一单位换算。若选择摩尔单位（如mM、uM等），默认母液与目标浓度的单位一致进行倍数稀释。</div>
+        </div>
+    </div>
+
+    <!-- 板块三：细胞铺板 -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-braille"></i>
+            <h2>3. 细胞铺板计算</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <label>铺设孔数</label>
+                <div class="input-group">
+                    <input type="number" id="plateWells" value="6" step="1" placeholder="例如 6">
+                    <select disabled style="max-width: 60px; background: transparent; color: var(--text-sub);">孔</select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>每孔细胞数</label>
+                <div class="input-group">
+                    <input type="number" id="plateCells" value="2" step="any" placeholder="例如 2">
+                    <select id="plateCellsUnit">
+                        <option value="1">个</option>
+                        <option value="10^4" selected>×10^4</option>
+                        <option value="10^5">×10^5</option>
+                        <option value="10^6">×10^6</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>每孔培养液</label>
+                <div class="input-group">
+                    <input type="number" id="plateVol" value="2" step="any" placeholder="例如 2">
+                    <select id="plateVolUnit">
+                        <option value="mL" selected>mL</option>
+                        <option value="µL">µL</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <label>原细胞悬液浓度</label>
+                <div class="input-group">
+                    <input type="number" id="plateStockConc" value="5.6" step="any" placeholder="例如 5.6">
+                    <select id="plateStockConcUnit">
+                        <option value="10^6/mL" selected>×10^6 / mL</option>
+                        <option value="10^5/mL">×10^5 / mL</option>
+                        <option value="10^7/mL">×10^7 / mL</option>
+                        <option value="cells/mL">个 / mL</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-calc" onclick="calculatePlating()"><i class="fas fa-calculator"></i> 计算</button>
+
+            <div class="result-box">
+                <div class="result-item">
+                    <span>需要取原细胞液</span>
+                    <span class="result-value" id="plateStockRes">0 mL</span>
+                </div>
+                <div class="result-item">
+                    <span>加培养液</span>
+                    <span class="result-value" id="plateMediumRes">0 mL</span>
+                </div>
+                <div class="result-item">
+                    <span>混合终体积</span>
+                    <span class="result-value" id="plateTotalRes">0 mL</span>
+                </div>
+                <div class="result-item">
+                    <span>然后每孔加</span>
+                    <span class="result-value" id="platePerWellRes">0 mL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // 通用转换逻辑
+    // ==========================================
+    
+    // 体积转升 (L)
+    function toLiter(vol, unit) {
+        if (unit === 'L') return vol;
+        if (unit === 'mL') return vol / 1000;
+        if (unit === 'µL') return vol / 1e6;
+        return vol;
+    }
+
+    // 判断是否为摩尔单位
+    function isMoleUnit(unit) {
+        return ['M', 'mM', 'uM', 'nM', 'pM'].includes(unit);
+    }
+
+    // 摩尔单位转 mol/L (M)
+    function toMolar(conc, unit) {
+        switch(unit) {
+            case 'M': return conc;
+            case 'mM': return conc / 1000;
+            case 'uM': return conc / 1e6;
+            case 'nM': return conc / 1e9;
+            case 'pM': return conc / 1e12;
+            default: return conc;
+        }
+    }
+
+    // 质量浓度单位转 g/L
+    function toGramPerLiter(conc, unit) {
+        switch(unit) {
+            case 'g/L': return conc;
+            case 'mg/L': return conc / 1000;
+            case 'µg/L': return conc / 1e6;
+            case 'g/mL': return conc * 1000;
+            case 'mg/mL': return conc; // mg/mL == g/L
+            case 'µg/mL': return conc / 1000; // µg/mL == mg/L
+            case 'ng/mL': return conc / 1e6;
+            case 'µg/µL': return conc * 1000; // µg/µL == g/L
+            case 'ng/µL': return conc; // ng/µL == µg/mL == mg/L
+            default: return conc;
+        }
+    }
+
+    // ==========================================
+    // 板块一：配制溶液
+    // ==========================================
+    document.getElementById('prepConcUnit').addEventListener('change', function() {
+        if (isMoleUnit(this.value)) {
+            document.getElementById('prepMwRow').style.display = 'flex';
+        } else {
+            document.getElementById('prepMwRow').style.display = 'none';
+        }
+    });
+
+    function calculatePrep() {
+        const vol = parseFloat(document.getElementById('prepVol').value);
+        const volUnit = document.getElementById('prepVolUnit').value;
+        const conc = parseFloat(document.getElementById('prepConc').value);
+        const concUnit = document.getElementById('prepConcUnit').value;
+        const mw = parseFloat(document.getElementById('prepMw').value);
+
+        if (isNaN(vol) || isNaN(conc) || vol <= 0 || conc <= 0) {
+            alert("请输入有效的体积和浓度！");
+            return;
+        }
+
+        const volL = toLiter(vol, volUnit);
+        let massG = 0;
+
+        if (isMoleUnit(concUnit)) {
+            if (isNaN(mw) || mw <= 0) {
+                alert("摩尔浓度计算需要有效的分子量！");
+                return;
+            }
+            const molar = toMolar(conc, concUnit); // mol/L
+            massG = molar * volL * mw;             // g
+        } else {
+            const gl = toGramPerLiter(conc, concUnit); // g/L
+            massG = gl * volL;                         // g
+        }
+
+        // 格式化输出
+        let resultStr = "";
+        if (massG >= 1) resultStr = massG.toFixed(3) + " g";
+        else if (massG >= 0.001) resultStr = massG.toFixed(5) + " g";
+        else resultStr = massG.toExponential(4) + " g";
+
+        document.getElementById('prepResult').innerText = resultStr;
+    }
+
+    // ==========================================
+    // 板块二：稀释溶液
+    // ==========================================
+    function calculateDilution() {
+        const stockConc = parseFloat(document.getElementById('dilConc').value);
+        const stockUnit = document.getElementById('dilConcUnit').value;
+        const targetConc = parseFloat(document.getElementById('targetConc').value);
+        const targetUnit = document.getElementById('targetConcUnit').value;
+        const targetVol = parseFloat(document.getElementById('targetVol').value);
+        const targetVolUnit = document.getElementById('targetVolUnit').value;
+
+        if (isNaN(stockConc) || isNaN(targetConc) || isNaN(targetVol) || 
+            stockConc <= 0 || targetConc <= 0 || targetVol <= 0) {
+            alert("请确保所有输入框都是有效的正数！");
+            return;
+        }
+
+        // 计算目标最终体积 (mL)
+        let targetVolMl = targetVol;
+        if (targetVolUnit === 'L') targetVolMl = targetVol * 1000;
+        if (targetVolUnit === 'µL') targetVolMl = targetVol / 1000;
+
+        let stockVolMl = 0;
+
+        // 质量浓度换算 (无需分子量)
+        if (!isMoleUnit(stockUnit) && !isMoleUnit(targetUnit)) {
+            // 统一转为 g/L
+            const c1 = toGramPerLiter(stockConc, stockUnit);
+            const c2 = toGramPerLiter(targetConc, targetUnit);
+            
+            if (c1 <= c2) {
+                alert("母液浓度必须大于目标浓度！");
+                return;
+            }
+            // C1 * V1 = C2 * V2 => V1 = (C2 * V2) / C1
+            stockVolMl = (c2 * targetVolMl) / c1;
+        } 
+        // 摩尔浓度换算 (无分子量时，直接按单位数值倍数计算，即假设母液和目标浓度单位一致)
+        else {
+            if (stockUnit !== targetUnit) {
+                alert("稀释溶液模块已去除分子量输入。\\n如果您使用摩尔浓度(M, mM等)计算，请确保母液和目标浓度的单位下拉框选择一致！\\n（例如：母液是 mM，目标也是 mM）");
+                return;
+            }
+            if (stockConc <= targetConc) {
+                alert("母液浓度必须大于目标浓度！");
+                return;
+            }
+            stockVolMl = (targetConc * targetVolMl) / stockConc;
+        }
+
+        const solventVolMl = targetVolMl - stockVolMl;
+
+        // 结果展示格式化
+        let stockStr = stockVolMl < 0.1 ? (stockVolMl * 1000).toFixed(2) + " µL" : stockVolMl.toFixed(3) + " mL";
+        let solventStr = solventVolMl < 0.1 ? (solventVolMl * 1000).toFixed(2) + " µL" : solventVolMl.toFixed(3) + " mL";
+
+        document.getElementById('dilStockRes').innerText = stockStr;
+        document.getElementById('dilSolventRes').innerText = solventStr;
+    }
+
+    // ==========================================
+    // 板块三：细胞铺板
+    // ==========================================
+    function calculatePlating() {
+        const wells = parseFloat(document.getElementById('plateWells').value);
+        const cellsInput = parseFloat(document.getElementById('plateCells').value);
+        const cellsUnit = document.getElementById('plateCellsUnit').value;
+        const volPerWell = parseFloat(document.getElementById('plateVol').value);
+        const volUnit = document.getElementById('plateVolUnit').value;
+        const stockConc = parseFloat(document.getElementById('plateStockConc').value);
+        const stockUnit = document.getElementById('plateStockConcUnit').value;
+
+        if (isNaN(wells) || isNaN(cellsInput) || isNaN(volPerWell) || isNaN(stockConc) ||
+            wells <= 0 || cellsInput <= 0 || volPerWell <= 0 || stockConc <= 0) {
+            alert("请确保所有输入框都是有效的正数！");
+            return;
+        }
+
+        // 每孔细胞数转换
+        let cellsMultiplier = 1;
+        if (cellsUnit === '10^4') cellsMultiplier = 1e4;
+        if (cellsUnit === '10^5') cellsMultiplier = 1e5;
+        if (cellsUnit === '10^6') cellsMultiplier = 1e6;
+        const totalCellsPerWell = cellsInput * cellsMultiplier;
+        const totalCellsNeeded = totalCellsPerWell * wells;
+
+        // 原液浓度转换
+        let stockMultiplier = 1;
+        if (stockUnit === '10^6/mL') stockMultiplier = 1e6;
+        if (stockUnit === '10^5/mL') stockMultiplier = 1e5;
+        if (stockUnit === '10^7/mL') stockMultiplier = 1e7;
+        const stockCellsPerMl = stockConc * stockMultiplier;
+
+        // 需要取原液体积 (mL)
+        const needStockVolMl = totalCellsNeeded / stockCellsPerMl;
+
+        // 每孔体积转 mL
+        let volPerWellMl = volPerWell;
+        if (volUnit === 'µL') volPerWellMl = volPerWell / 1000;
+
+        // 混合终体积 (mL)
+        const totalFinalVolMl = volPerWellMl * wells;
+
+        // 加培养液体积 (mL)
+        const needMediumVolMl = totalFinalVolMl - needStockVolMl;
+
+        if (needMediumVolMl < 0) {
+            alert(`原液浓度过低！所需原液体积 (${needStockVolMl.toFixed(3)} mL) 已超过总终体积 (${totalFinalVolMl.toFixed(3)} mL)。`);
+            return;
+        }
+
+        // 格式化输出
+        let displayStockStr = needStockVolMl < 0.1 ? (needStockVolMl * 1000).toFixed(1) + " µL" : needStockVolMl.toFixed(3) + " mL";
+
+        document.getElementById('plateStockRes').innerText = displayStockStr;
+        document.getElementById('plateMediumRes').innerText = needMediumVolMl.toFixed(3) + " mL";
+        document.getElementById('plateTotalRes').innerText = totalFinalVolMl.toFixed(3) + " mL";
+        document.getElementById('platePerWellRes').innerText = volPerWell + " " + volUnit;
+    }
+
+    // 页面加载完成后自动计算一次
+    window.onload = function() {
+        calculatePrep();
+        calculateDilution();
+        calculatePlating();
+    };
+</script>
+</body>
+</html>
